@@ -10,6 +10,10 @@ CORS(app)
 EMAIL_ADDRESS = os.environ.get('EMAIL_USER')
 EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
 
+@app.route('/work', methods=['POST'])
+def work():
+    return "Online"
+
 @app.route('/send-email', methods=['POST'])
 def send_email():
     data = request.json
