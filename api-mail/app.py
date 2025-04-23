@@ -1,40 +1,43 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import smtplib
-from email.message import EmailMessage
-import os
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = '33332008'  # Para usar flash messages
 
-EMAIL_ADDRESS = os.environ.get('EMAIL_USER')
-EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
+# Configurações do servidor de e-mail (exemplo com Gmail)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'andrelacerda.ti@gmail.com'
+app.config['MAIL_PASSWORD'] = 'fcbs imyq ezfc inxl'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
-@app.route('/work', methods=['POST'])
-def work():
-    return "Online"
+mail = Mail(app)
 
-@app.route('/send-email', methods=['POST'])
-def send_email():
-    data = request.json
+@app.route("/status", methods=["GET"])
+def status():
+    return jsonify({"status": "Online"}), 200
 
-    nome = data.get('nome')
-    email_remetente = data.get('email')
-    telefone = data.get('telefone')
-    mensagem = data.get('mensagem')
+@app.route("/email", methods=["GET", "POST"])
+def email():
+    if request.method == "POST":
+        nome = request.form["nome"]
+        email = request.form["email"]
+        telefone = request.form["telefone"]
+        mensagem = request.form["mensagem"]
 
-    msg = EmailMessage()
-    msg['Subject'] = f'Nova mensagem de {nome}'
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = EMAIL_ADDRESS  # Pode ser um e-mail fixo seu
-    msg.set_content(f"Nome: {nome}\nEmail: {email_remetente}\nTelefone: {telefone}\nMensagem:\n{mensagem}")
-
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            smtp.send_message(msg)
-        return jsonify({"status": "success", "message": "E-mail enviado com sucesso!"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        msg = Message(
+            subject=f"Cabine037 - Cotação para {nome}",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=["andrelacerda.ti@gmail.com"],  # quem recebe
+            body=f"Nome: {nome}\nEmail: {email}\nTelefone: {telefone}\nMensagem: {mensagem}"
+        )
+        
+        try:
+            mail.send(msg)
+            return jsonify({"status": "success", "message": "E-mail enviado com sucesso!"})
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run()
