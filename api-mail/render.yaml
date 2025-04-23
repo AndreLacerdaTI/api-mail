@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: api-mail
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: gunicorn app:app
+    envVars:
+      - key: EMAIL_USER
+        value: andrelacerda.ti@gmail.com
+      - key: EMAIL_PASS
+        value: fcbs imyq ezfc inxl
