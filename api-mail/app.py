@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_mail import Mail, Message
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = '33332008'  # Para usar flash messages
+
 
 # Configurações do servidor de e-mail (exemplo com Gmail)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
